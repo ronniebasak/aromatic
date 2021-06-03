@@ -1,6 +1,6 @@
-#Arogmatic Roadmap
+# Aromatic Roadmap
 
-##Target for Version 0.0.1
+## Target for Version 0.0.1
 
 ### v0.0.1 - Proof of Concept
 * Get a pydantic model to save to arangoDB as a document in a collection
