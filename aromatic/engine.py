@@ -9,6 +9,7 @@ import aromatic.errors as errors
 from pydantic import BaseModel
 from pprint import pprint
 from enum import Enum
+from datetime import date, datetime
 
 
 class AromaticFindFallbackOptions(Enum):
@@ -43,7 +44,16 @@ class AIOAromaEngine:
         pass
 
     @staticmethod
-    def _map_doc_before_save(document: dict) -> dict:
+    def _map_doc_before_save(model: Type[ModelType]) -> dict:
+        document = model.dict()
+        annotations = model.__class__.__annotations__
+
+        for key in annotations:
+            if annotations[key] == datetime and type(document[key]) == datetime:
+                document[key] = document[key].isoformat()
+            if annotations[key] == date and type(document[key]) == date:
+                document[key] = document[key].isoformat()
+
         if document.get('id'):
             document["_id"] = document.get("id")
         if document.get('key'):
@@ -54,6 +64,7 @@ class AIOAromaEngine:
         del document['id']
         del document['rev']
         del document['key']
+        print(document)
         return document
 
     async def save(self, model: Type[ModelType]) -> Type[ModelType]:
@@ -68,8 +79,7 @@ class AIOAromaEngine:
         else:
             _collection: Collection = await self.database.create_collection(_collection_name)
 
-        _doc_to_save = self._map_doc_before_save(model.dict())
-        print(_doc_to_save)
+        _doc_to_save = self._map_doc_before_save(model)
         db_ack = await self.database.insert_document(_collection_name, _doc_to_save, True, True)
         model.id = db_ack['_id']
         model.key = db_ack['_key']
