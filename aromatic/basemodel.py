@@ -39,16 +39,16 @@ class BaseAromaticModel(BaseModel):
     rev: str = ""
     key: str = ""
 
-    def __init__(self, **kwargs: Any):
-        super(BaseAromaticModel, self).__init__(**kwargs)
+    def __init__(self, **data: Any):
+        super(BaseAromaticModel, self).__init__(**data)
 
-        for key in kwargs:
+        for key in data:
             if key == '_id':
-                self.id = kwargs[key]
+                self.id = data[key]
             elif key == '_rev':
-                self.rev = kwargs[key]
+                self.rev = data[key]
             elif key == '_key':
-                self.key = kwargs[key]
+                self.key = data[key]
 
 
     class Meta:

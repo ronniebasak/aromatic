@@ -16,6 +16,7 @@
     * Naive `date`
     
 ### v0.0.3 - Objective
+* Support CRUD
 * Work on the following types
     * Embedded Models
     * `List`
