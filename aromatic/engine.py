@@ -24,10 +24,10 @@ ModelType = TypeVar("ModelType", bound=BaseAromaticModel)
 class AIOAromaEngine:
     database: Database
 
-    def __init__(self, arango_client: Optional[ArangoClient], database: str = "test", username: Optional[str] = None,
+    def __init__(self, hosts: Optional[str] = "https://127.0.0.1:8529", database: str = "test", username: Optional[str] = None,
                  password: Optional[str] = None):
-        if arango_client is None:
-            arango_client = ArangoClient()
+
+        arango_client = ArangoClient(hosts=hosts)
         self.client = arango_client
         self.database_name = database
         self.username = username
