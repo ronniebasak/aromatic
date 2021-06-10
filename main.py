@@ -27,20 +27,22 @@ async def main():
     obj1 = MyData2(name="Sohan", num=2, list=[2, 3, 4], tup=("S", 2), ts=datetime.utcnow(), dt=date.today())
     print(obj1)
     client = ArangoClient()
-    engine = AIOAromaEngine(arango_client=client, database='romatic_test', username='root', password='openSesame')
+    engine = AIOAromaEngine(hosts="http://localhost:8529", database='romatic_test', username='root', password='openSesame')
 
     engine._map_doc_before_save(obj1)
     d = await engine.save(obj1)
-    await client.close()
+    await engine.client.close()
 
 
 async def main2():
-    client = ArangoClient()
-    engine = AIOAromaEngine(arango_client=client, database='romatic_test', username='root', password='openSesame')
+    engine = AIOAromaEngine(hosts="http://localhost:8529", database='romatic_test', username='root', password='openSesame')
 
     d = await engine.find(MyData2)
     print(d)
-    await client.close()
+
+    d[0].name = "HahaBaa"
+    await engine.save(d[0])
+    await engine.client.close()
 
 
 loop = asyncio.run(main2())

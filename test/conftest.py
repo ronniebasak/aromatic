@@ -26,7 +26,7 @@ async def engine():
 
     # COMMENT THIS LINE IF YOU WANT TO SEE THE TEST DATA PERSIST IN DATABASE
     # Also delete if you are insane
-    await engine.database.delete_collection('test_123', ignore_missing=True)
-    await engine.database.delete_collection('test_124', ignore_missing=True)
+    collection = ["test_123", "test_124", "test_crud_1"]
+    for i in collection:
+        await engine.database.delete_collection(i, ignore_missing=True)
     await engine.client.close()
-

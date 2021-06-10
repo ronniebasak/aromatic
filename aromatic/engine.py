@@ -79,8 +79,14 @@ class AIOAromaEngine:
         else:
             _collection: Collection = await self.database.create_collection(_collection_name)
 
+        print(model.dict())
         _doc_to_save = self._map_doc_before_save(model)
-        db_ack = await self.database.insert_document(_collection_name, _doc_to_save, True, True)
+
+        if _doc_to_save.get('_id') is None or _doc_to_save.get('_id') == "":
+            db_ack = await self.database.insert_document(_collection_name, _doc_to_save, True, True)
+        else:
+            print("DB_ACK", _doc_to_save)
+            db_ack = await self.database.update_document(_doc_to_save, sync=True)
         model.id = db_ack['_id']
         model.key = db_ack['_key']
         model.rev = db_ack['_rev']
