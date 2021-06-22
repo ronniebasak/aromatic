@@ -24,7 +24,8 @@ ModelType = TypeVar("ModelType", bound=BaseAromaticModel)
 class AIOAromaEngine:
     database: Database
 
-    def __init__(self, hosts: Optional[str] = "https://127.0.0.1:8529", database: str = "test", username: Optional[str] = None,
+    def __init__(self, hosts: Optional[str] = "https://127.0.0.1:8529", database: str = "test",
+                 username: Optional[str] = None,
                  password: Optional[str] = None):
 
         arango_client = ArangoClient(hosts=hosts)
@@ -162,3 +163,28 @@ class AIOAromaEngine:
                 return None
             elif fallback == AromaticFindFallbackOptions.ERROR:
                 raise errors.AromaticCollectionNotFound()
+
+    async def delete(self, model: ModelType, query: Optional[dict] = None,
+                     fallback: AromaticFindFallbackOptions = AromaticFindFallbackOptions.EMPTY_ARRAY) -> Type[ModelType]:
+        if not self.ready_state == "db_init":
+            await self
+        if not model.Meta.collection_name:
+            raise errors.AromaticException("Could not look up collection name for this model")
+
+        _collection_name: str = model.Meta.collection_name
+        if await self.database.has_collection(_collection_name):
+            _collection: Collection = self.database.collection(_collection_name)
+        else:
+            if fallback == AromaticFindFallbackOptions.EMPTY_ARRAY:
+                raise errors.AromaticCollectionNotFound()
+            elif fallback == AromaticFindFallbackOptions.NONE:
+                return None
+            elif fallback == AromaticFindFallbackOptions.ERROR:
+                raise errors.AromaticCollectionNotFound()
+
+        _filter: dict = {} if type(query) != dict else query
+        data: Collection = self.database.collection(_collection_name)
+
+        jsondata = self._map_doc_before_save(model)
+        d= await data.delete(jsondata)
+        return d

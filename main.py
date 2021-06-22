@@ -44,5 +44,15 @@ async def main2():
     await engine.save(d[0])
     await engine.client.close()
 
+async def main3():
+    engine = AIOAromaEngine(hosts="http://localhost:8529", database='romatic_test', username='root', password='openSesame')
 
-loop = asyncio.run(main2())
+    d = await engine.find(MyData2)
+    print(d)
+
+    # d[0].name = "HIHIHIHI"
+    dx = await engine.delete(d[0])
+    print(dx)
+    await engine.client.close()
+
+loop = asyncio.run(main3())
