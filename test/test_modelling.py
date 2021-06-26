@@ -1,8 +1,7 @@
 import pytest
 from aromatic.basemodel import BaseAromaticModel
 from aromatic.engine import AIOAromaEngine
-from pydantic import constr, EmailStr
-from pydantic import ValidationError
+from pydantic import BaseModel, constr, EmailStr, ValidationError
 from datetime import datetime
 from typing import List, Tuple
 
@@ -114,5 +113,40 @@ async def test_modelling_2(engine: AIOAromaEngine):
     assert d1 == d2
 
 
+@pytest.mark.asyncio
+async def test_modelling_3(engine: AIOAromaEngine):
+    """Testing saving Embedded Model"""
 
+    class Profile(BaseModel):
+        email: EmailStr
 
+    class MyClass(BaseAromaticModel):
+        username: str
+        password: str
+        profile: Profile
+
+        class Meta:
+            collection_name: str = "test_123"
+
+    obj = MyClass(username="unique_todd", password="horseman", profile=Profile(email="abc@example.com"))
+    d1 = obj.dict()
+
+    saved: MyClass = await engine.save(obj)
+    assert type(saved.id) == str
+    assert type(saved.key) == str
+    assert type(saved.rev) == str
+    assert saved.id != "" and saved.key != "" and saved.rev != ""
+
+    d2 = saved.dict()
+    del d2['id']
+    del d2['rev']
+    del d2['key']
+    del d1['id']
+    del d1['rev']
+    del d1['key']
+
+    assert d1 == d2
+
+    obj2 = await engine.find_one(MyClass, {'username': 'unique_todd'})
+    assert saved.dict() == obj2.dict()
+    assert obj2.profile.email == "abc@example.com"
