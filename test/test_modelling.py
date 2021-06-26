@@ -2,7 +2,7 @@ import pytest
 from aromatic.basemodel import BaseAromaticModel
 from aromatic.engine import AIOAromaEngine
 from pydantic import BaseModel, constr, EmailStr, ValidationError
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import List, Tuple
 
 
@@ -149,4 +149,41 @@ async def test_modelling_3(engine: AIOAromaEngine):
 
     obj2 = await engine.find_one(MyClass, {'username': 'unique_todd'})
     assert saved.dict() == obj2.dict()
-    assert obj2.profile.email == "abc@example.com"
+    assert obj2.profile.email == "abc@example.com"\
+
+
+@pytest.mark.asyncio
+async def test_datetime(engine: AIOAromaEngine):
+    """Testing saving and finding non-naive datetime"""
+    import pytz
+
+    class MyClass(BaseAromaticModel):
+        username: str
+        password: str
+        SED: datetime
+
+        class Meta:
+            collection_name: str = "test_123"
+
+    obj = MyClass(username="unique_mahi", password="horseman", SED=datetime.fromisoformat("2020-01-01T00:00+05:30"))
+    d1 = obj.dict()
+
+    saved: MyClass = await engine.save(obj)
+    assert type(saved.id) == str
+    assert type(saved.key) == str
+    assert type(saved.rev) == str
+    assert saved.id != "" and saved.key != "" and saved.rev != ""
+
+    d2 = saved.dict()
+    del d2['id']
+    del d2['rev']
+    del d2['key']
+    del d1['id']
+    del d1['rev']
+    del d1['key']
+
+    assert d1 == d2
+
+    obj2 = await engine.find_one(MyClass, {'username': 'unique_mahi'})
+    assert saved.dict() == obj2.dict()
+    assert obj2.SED.tzinfo == timezone(timedelta(seconds=19800))

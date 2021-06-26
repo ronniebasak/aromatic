@@ -68,6 +68,11 @@ class AIOAromaEngine:
         print(document)
         return document
 
+    @staticmethod
+    def _map_doc_before_load(data: dict, model: Type[ModelType]) -> Type[ModelType]:
+        print("ANNOTATIONS",model.__annotations__);
+        return model(**data)
+
     async def save(self, model: Type[ModelType]) -> Type[ModelType]:
         if not self.ready_state == "db_init":
             await self
@@ -117,7 +122,7 @@ class AIOAromaEngine:
         data: Collection = self.database.collection(_collection_name)
 
         _docs = await data.find(_filter)
-        docs = [model(**doc) async for doc in _docs]
+        docs = [self._map_doc_before_load(doc, model) async for doc in _docs]
 
         if len(docs):
             return docs
@@ -152,7 +157,7 @@ class AIOAromaEngine:
         data: Collection = self.database.collection(_collection_name)
 
         _docs = await data.find(_filter, skip=0, limit=1)
-        doc = [model(**doc) async for doc in _docs]
+        doc = [self._map_doc_before_load(doc, model) async for doc in _docs]
 
         if len(doc):
             return doc[0]
