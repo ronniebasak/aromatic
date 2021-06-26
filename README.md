@@ -2,13 +2,6 @@
 ArangoDB Modelling Layer based on Pydantic and inspired by Odmantic
 
 
-## Reached version 0.0.1 - Proof of Concept
-It has been possible to load and save pydantic models via this API.
-
-* `engine.save(Model)` saves into the model
-* `engine.find(Model, query)` return a list
-* `engine.find_one(Model, query)` returns a single model
-
 ## Reached version 0.0.2 - Baby Steps
 It now supports all of the following types
 * `str`
@@ -17,6 +10,18 @@ It now supports all of the following types
 * `Tuple`
 * Naive `datetime`
 * Naive `date`
+
+### v0.0.3 - Objective - Jun 27
+it now supports CRUD on the following types
+
+* Work on the following types
+    * Embedded Models (are simply Pydantic BaseModels, likely to change to accomodate invalid name error)
+    * `List`
+    * `Dict`
+    * `datetime`
+    * `date`
+    * `Any`
+    * `con*` types from pydantic
 
 See `main.py` for usage. 
 
@@ -54,19 +59,18 @@ pytest -v
 **To check coverage report**
 ```shell
 coverage run -m pytest -v
+coverage report
 ```
 
 ```text
-As of Jun 11, the integration tests have a 59% coverage
-
 Name                    Stmts   Miss Branch BrPart  Cover
 ---------------------------------------------------------
 aromatic/__init__.py        0      0      0      0   100%
 aromatic/basemodel.py      20      0      8      0   100%
-aromatic/engine.py        122     43     64      7    55%
+aromatic/engine.py        145     61     76      7    48%
 aromatic/errors.py         19      9      6      0    40%
 ---------------------------------------------------------
-TOTAL                     161     52     78      7    59%
+TOTAL                     184     70     90      7    53%
 
 ```
 
